@@ -19,13 +19,13 @@ You have been warned.
 The code is mostly there to be used from a REPL.
 
     ;;; Namespaces
-    (require '[zanzel.platform :as zpl])
-    (require '[zanzel.system :as zs])
-    (require '[zanzel.presentation :as zp])
-    (require '[zanzel.core :as zc])
+    (require '[zanzel.platform :as zpl] :reload)
+    (require '[zanzel.system :as zs] :reload)
+    (require '[zanzel.presentation :as zp] :reload)
+    (require '[zanzel.core :as zc] :reload)
     (require '[clojure.pprint :refer :all])
-    (require '[analemma.xml :as axml])
-    (require '[analemma.svg :as asvg])
+    (require '[incanter.core :refer :all])
+    (require '[incanter.charts :refer :all])
 
     ;;; The current platform
     (def curr-plat
@@ -53,6 +53,10 @@ The code is mostly there to be used from a REPL.
             (println "Generated configurations:" @zc/*generated*)
             (println "Explored configurations:" @zc/*explored*)
             sols)))
+
+    ;;; Save a graphical representation in a directory for the ten first solutions
+    ;;; *CREATE THE DIRECTORY BEFORE TRYING THIS
+    (zc/entry-point curr-plat reqs (str (System/getProperty "user.home") "/scratch") 10)
 
 
 ## TO-DO

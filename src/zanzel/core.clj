@@ -2,7 +2,10 @@
   (:require [zanzel.search :as zse]
             [zanzel.system :as zsy]
             [zanzel.platform :as zsp]
-            [zanzel.platform :as zpl]))
+            [zanzel.platform :as zpl]
+            [zanzel.presentation :as zp]
+            [incanter.core :refer :all]
+            [incanter.charts :refer :all]))
 
 (def ^:dynamic *explored*)
 (def ^:dynamic *generated*)
@@ -103,3 +106,20 @@
        (list initial-platform)
        good-platforms-fn
        pruning-next-platforms-fn))))
+
+(defn entry-point
+  [curr-platform reqs target-dir num-solutions & {:keys [monitor] :or {monitor true}}]
+  (binding [*explored* (agent 0)
+            *generated* (agent 0)]
+    (let [solutions (take num-solutions (find-configurations curr-platform reqs))
+          idx-solutions (map vector (iterate inc 0) solutions)]
+      (when monitor
+        (let [{chart :chart ds-gen :generated ds-exp :explored} (zp/monitor-chart)
+              start-time (System/currentTimeMillis)]
+          (add-watch *explored* :exp-update (fn [_ _ _ n]
+                                              (.add ds-exp (- (System/currentTimeMillis) start-time) n)))
+          (add-watch *generated* :gen-update (fn [_ _ _ n]
+                                               (.add ds-gen (- (System/currentTimeMillis) start-time) n)))
+          (view chart)))
+      (doseq [[idx plat] idx-solutions]
+        (zp/solution-as-png-file (format "%s/solution-%05d.png" target-dir idx) plat)))))

@@ -5,7 +5,12 @@
             [analemma.xml :as axml]
             [analemma.svg :as svg]
             [tikkba.transcoder :as t]
-            [tikkba.dom :refer [svg-doc]]))
+            [tikkba.dom :refer [svg-doc]]
+            [incanter.core :refer :all]
+            [incanter.charts :refer :all])
+  (:import (org.jfree.chart ChartFactory LegendItem LegendItemCollection)
+           (org.jfree.data.xy XYSeriesCollection XYSeries)
+           (org.jfree.chart.plot PlotOrientation)))
 
 (defn- head-as-str
   [system]
@@ -141,21 +146,35 @@
         (text-item x-pos 70 ops-txt)
         (text-item x-pos 90 u-txt)))))
 
-  (defn solution-as-svg
-    [platform]
-    (let [[plat-svg max-pl-x max-pl-y] (platform-as-svg platform)
-          num-systems (count platform)
-          pl-cap (zpl/platform-get-capacity platform)
-          {standard :standard-size premium :premium-size replica :replica-size ru :rack-u ops :ops} pl-cap
-          header-txt (format "Config (%d systems)" num-systems ru)
-          header-svg (svg-block 0 0 max-pl-x 40 12 header-txt :color "#541F14" :text-color "white")
-          footer-svg (capacity-as-svg max-pl-x standard premium replica ops ru)
-          all-svg (svg/group
-                    header-svg
-                    (svg/translate (grid-as-svg max-pl-x max-pl-y 10) 0 40)
-                    (svg/translate plat-svg 0 40)
-                    (svg/translate footer-svg 0 (+ 40 max-pl-y)))]
-      [all-svg max-pl-x (+ 40 100 max-pl-y)]))
+(defn solution-as-svg
+  [platform]
+  (let [[plat-svg max-pl-x max-pl-y] (platform-as-svg platform)
+        num-systems (count platform)
+        pl-cap (zpl/platform-get-capacity platform)
+        {standard :standard-size premium :premium-size replica :replica-size ru :rack-u ops :ops} pl-cap
+        header-txt (format "Config (%d systems)" num-systems ru)
+        header-svg (svg-block 0 0 max-pl-x 40 12 header-txt :color "#541F14" :text-color "white")
+        footer-svg (capacity-as-svg max-pl-x standard premium replica ops ru)
+        all-svg (svg/group
+                  header-svg
+                  (svg/translate (grid-as-svg max-pl-x max-pl-y 10) 0 40)
+                  (svg/translate plat-svg 0 40)
+                  (svg/translate footer-svg 0 (+ 40 max-pl-y)))]
+    [all-svg max-pl-x (+ 40 100 max-pl-y)]))
+
+(defn monitor-chart
+  []
+  (let [ds-gen (XYSeries. "generated")
+        ds-exp (XYSeries. "explored")
+        series-col (doto (XYSeriesCollection.) (.addSeries ds-gen) (.addSeries ds-exp))
+        chart (doto (ChartFactory/createXYLineChart
+                      "Configurations"
+                      "Time"
+                      "Number"
+                      series-col
+                      PlotOrientation/VERTICAL
+                      true false false))]
+    {:chart chart :generated ds-gen :explored ds-exp}))
 
 (defn solution-as-png-file
   [filename platform]
