@@ -6,6 +6,7 @@ with the Clojure lazy constructions taking advantage of a similar project at wor
 environments (even though it could be easily evolved to something _very useful_).
 
 [![Build Status](https://travis-ci.org/c-garcia/zanzel.svg?branch=master)](https://travis-ci.org/c-garcia/zanzel)
+[![Dependencies Status](http://jarkeeper.com/c-garcia/zanzel/status.png)](http://jarkeeper.com/c-garcia/zanzel)
 
 ## The storage systems
 
