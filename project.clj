@@ -1,4 +1,4 @@
-(defproject zanzel "0.3.0"
+(defproject zanzel "0.3.1"
   :description "Some experiments on using lazy constructions to explore a search space"
   :url "http://www.obliquo.eu"
   :license {:name "Eclipse Public License"

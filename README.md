@@ -5,6 +5,8 @@ three storage service classes: _standard_, _premium_ and _replica_. This is *an 
 with the Clojure lazy constructions taking advantage of a similar project at work. It has no intent to be used in production
 environments (even though it could be easily evolved to something _very useful_).
 
+[![Build Status](https://travis-ci.org/c-garcia/zanzel.svg?branch=master)](https://travis-ci.org/c-garcia/zanzel)
+
 ## The storage systems
 
 The storage hardware in the code, NetApp FAS2254, has some capacity figures attached. These are not generic
