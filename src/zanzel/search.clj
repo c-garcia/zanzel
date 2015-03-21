@@ -1,17 +1,15 @@
 (ns zanzel.search
   (:require [zanzel.queues :as q]
+            [zanzel.meters :as m]
             [clojure.set :as cs]))
 
-(def ^:dynamic *visited*)
-(def ^:dynamic *selected*)
+(m/defcounter
+  "Number of solutions visited so far"
+  *visited*)
 
-(defmacro inc-counter
-  [v]
-  `(when (bound? (var ~v)) (send ~v inc)))
-
-(defmacro add-to-counter
-  [v i]
-  `(when (bound? (var ~v)) (send ~v + ~i)))
+(m/defcounter
+  "Number of solutions deemed as valid"
+  *selected*)
 
 (defn bfs
   "Starting from the xs sequence, collects those nodes satisfying select-node-fn (solutions)
@@ -31,11 +29,11 @@
                   (set visited-nodes)))))
           (step [q visited]
                 (when-let [node (q/head q)]
-                  (inc-counter *visited*)
+                  (m/inc-counter *visited*)
                   (let [next-visited (conj visited node)]
                     (if (select-node-fn node)
                       (do
-                        (inc-counter *selected*)
+                        (m/inc-counter *selected*)
                         (if-not refine-solutions
                           (lazy-seq (cons node (step (q/deq q) next-visited)))
                           (let [next-nodes (->> (generate-nodes node) (filter-non-visited-nodes q visited))

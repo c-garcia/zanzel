@@ -5,9 +5,8 @@
             [analemma.xml :as axml]
             [analemma.svg :as svg]
             [tikkba.transcoder :as t]
-            [tikkba.dom :refer [svg-doc]]
-            [incanter.core :refer :all]
-            [incanter.charts :refer :all])
+            [tikkba.dom :refer [svg-doc]])
+
   (:import (org.jfree.chart ChartFactory LegendItem LegendItemCollection)
            (org.jfree.data.xy XYSeriesCollection XYSeries)
            (org.jfree.chart.plot PlotOrientation)))

@@ -24,8 +24,6 @@ The code is mostly there to be used from a REPL.
     (require '[zanzel.presentation :as zp] :reload)
     (require '[zanzel.core :as zc] :reload)
     (require '[clojure.pprint :refer :all])
-    (require '[incanter.core :refer :all])
-    (require '[incanter.charts :refer :all])
 
     ;;; The current platform
     (def curr-plat
@@ -66,7 +64,7 @@ A lot of things. Unfortunately, I have not a lot of time at the moment but it wo
 * Heavily refactor the code. Now it is somewhat messy since I was in learning-mode. I am not a super-expert in
    Clojure.
 * Better model the data (maybe using prismatic/schema?).
-* Direct the search which now is exhaustive (and provides infinite results)
+* Better direct the search. As of now, adds new systems when there is no more space for disks.
 * Add more configuration options that could satisfy the same requirements (DS4486 shelves).
 * Provide more capacity factors and make the system choose the optimal solution (trivial):
     * Power / Cooling utilization (cost).
@@ -80,7 +78,7 @@ writer, Jack Vance.
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015 Cristobal Garcia
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.

@@ -4,11 +4,11 @@
             [zanzel.platform :as zsp]
             [zanzel.platform :as zpl]
             [zanzel.presentation :as zp]
-            [incanter.core :refer :all]
-            [incanter.charts :refer :all]))
+            [zanzel.meters :as m])
+  (:import (org.jfree.chart ChartFrame)))
 
-(def ^:dynamic *explored*)
-(def ^:dynamic *generated*)
+(m/defcounter *explored-by-fn*)
+(m/defcounter *generated-by-fn*)
 
 (defn good-platform?-make
   "Returns a function that determines is a platform is a solution of the
@@ -18,7 +18,7 @@
   [capacity-requirements]
   (fn [pl]
     (let [pl-capacity (zsp/platform-get-capacity pl)]
-      (when (= (class *explored*) clojure.lang.Agent) (send *explored* inc))
+      (m/inc-counter *explored-by-fn*)
       (every? (fn [[k v]] (>= (get pl-capacity k 0) v)) capacity-requirements))))
 
 (defn exhaustive-next-platforms
@@ -59,7 +59,7 @@
                 stack (zsy/system-find-suitable-stack sys shelf)
                 :let [new-sys (zsy/system-add-shelf sys stack shelf)]]
             (do
-              (when (= (class *generated*) clojure.lang.Agent) (send *generated* inc))
+              (m/inc-counter *generated-by-fn*)
               (-> curr-plat (disj sys) (conj new-sys))))
           (for [factor cap-factors
                 :while (> (get reqs factor 0) (get curr-plat factor 0))
@@ -67,7 +67,7 @@
                 :let [new-sys (zsy/storage-system-make system-opts)]
                 :when (not (contains? curr-plat new-sys))]
             (do
-              (when (= (class *generated*) clojure.lang.Agent) (send *generated* inc))
+              (m/inc-counter *generated-by-fn*)
               (conj curr-plat new-sys))))))))
 
 (defn size-distance
@@ -109,17 +109,17 @@
 
 (defn entry-point
   [curr-platform reqs target-dir num-solutions & {:keys [monitor] :or {monitor true}}]
-  (binding [*explored* (agent 0)
-            *generated* (agent 0)]
+  (binding [*explored-by-fn* (m/counter-starting-at 0)
+            *generated-by-fn* (m/counter-starting-at 0)]
     (let [solutions (take num-solutions (find-configurations curr-platform reqs))
           idx-solutions (map vector (iterate inc 0) solutions)]
       (when monitor
         (let [{chart :chart ds-gen :generated ds-exp :explored} (zp/monitor-chart)
               start-time (System/currentTimeMillis)]
-          (add-watch *explored* :exp-update (fn [_ _ _ n]
+          (add-watch *explored-by-fn* :exp-update (fn [_ _ _ n]
                                               (.add ds-exp (- (System/currentTimeMillis) start-time) n)))
-          (add-watch *generated* :gen-update (fn [_ _ _ n]
+          (add-watch *generated-by-fn* :gen-update (fn [_ _ _ n]
                                                (.add ds-gen (- (System/currentTimeMillis) start-time) n)))
-          (view chart)))
+          (doto (ChartFrame. "Exploration status" chart) (.pack) (.setVisible true))))
       (doseq [[idx plat] idx-solutions]
         (zp/solution-as-png-file (format "%s/solution-%05d.png" target-dir idx) plat)))))
