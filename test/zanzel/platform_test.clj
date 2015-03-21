@@ -22,5 +22,5 @@
           sys2 (zsy/storage-system-make :premium-first)
           pl (platform-make sys1 sys2)]
       (is (=
-            {:standard-size 19 :premium-size 6 :ops (+ 570 870) :disks 48}
+            {:standard-size 19 :premium-size 6 :ops (+ 570 870) :disks 48 :rack-u 6}
             (platform-get-capacity pl))))))
