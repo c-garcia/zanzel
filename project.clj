@@ -8,6 +8,4 @@
                  [org.clojars.pallix/analemma "1.0.0" :exclusions [org.clojure/clojure]]
                  [tikkba "0.5.0" :exclusions [org.clojure/clojure]]
                  [jfree/jfreechart "1.0.13"]
-                 [org.jfree/jcommon "1.0.23"]]
-  :profiles {:dev {:dependencies [[org.clojure/test.check "0.7.0"]
-                                  [clj-factory "0.2.1"]]}})
+                 [org.jfree/jcommon "1.0.23"]])

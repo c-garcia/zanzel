@@ -166,13 +166,13 @@
   (let [ds-gen (XYSeries. "generated")
         ds-exp (XYSeries. "explored")
         series-col (doto (XYSeriesCollection.) (.addSeries ds-gen) (.addSeries ds-exp))
-        chart (doto (ChartFactory/createXYLineChart
+        chart (ChartFactory/createXYLineChart
                       "Configurations"
                       "Time"
                       "Number"
                       series-col
                       PlotOrientation/VERTICAL
-                      true false false))]
+                      true false false)]
     {:chart chart :generated ds-gen :explored ds-exp}))
 
 (defn solution-as-png-file
