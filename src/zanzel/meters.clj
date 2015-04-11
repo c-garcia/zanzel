@@ -1,4 +1,14 @@
-(ns zanzel.meters)
+(ns zanzel.meters
+  "Minimal instrumentation layer able to create and update counters and gauges allowing us to peek into
+  functions. Counters and gauges are implemented via dynamic vars and agents.
+
+  Example: monitoring the number of invocations of a function within a specific form:
+  (defcounter f-invocations)
+  (defn f [] (inc-counter f-invocations) 0)
+
+  (with-meters [f-invocations (counter-starting-at 0)]
+    (f))
+  ")
 
 ;;; Counters
 
@@ -60,12 +70,21 @@
 ;;; Meters
 
 (defmacro with-meters
+  "Creates a block where some counters are bound to the proper value and then, they
+  can be modidifed in a thread-safe manner.
+
+  (defcounter c1)
+  (defn f1 [] (inc-counter c1) 0)
+  (with-meters [c1 (counter-starting-at 0)]
+    (f1))
+  "
   [bindings & body]
   (assert (vector? bindings) "Bindings should be a vector")
   (assert (even? (count bindings)) "Bindings should have an even number of args")
   `(binding ~bindings ~@body))
 
 (defn find-meters
+  "Enumerates the meters defined in a namespace as a set of symbols."
   [ns]
   (->> ns
        ns-publics

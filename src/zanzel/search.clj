@@ -1,4 +1,8 @@
 (ns zanzel.search
+  "A namespace which implements a lazy version of a Breadth-First search.
+  It exposes two counters:
+  *visited*: number of solutions visited so far.
+  *selected*: number of solutions selected so far."
   (:require [zanzel.queues :as q]
             [zanzel.meters :as m]
             [clojure.set :as cs]))

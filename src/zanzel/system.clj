@@ -1,4 +1,12 @@
 (ns zanzel.system
+  "Namespace which holds all the function related to individual hardware systems.
+
+  Everything is created as maps.
+  * A system is a map holding two stacks of shelves.
+  * Each shelf is a map.
+  * Capacity is a map of capacity factors (symbol -> value) which can be attached
+    to a shelf or a system and can be aggregated afterwards.
+  "
   (:require [clojure.string :refer [upper-case join escape]]
             [analemma.svg :as svg]))
 
@@ -19,6 +27,8 @@
 ;;
 
 (defn storage-system-make
+  "Creates a storage system from one ot these three types: :replica-first, :premium-first or :standard-first.
+  This defines which storage class will be held by the system in the beginning."
   [sys-class]
   (case sys-class
     :premium-first {:type          :fas2552,
@@ -41,6 +51,7 @@
                                       :capacity {:replica-size 28, :ops (* 28 15), :disks 24 :rack-u 4}}] []]}))
 
 (defn shelf-make
+  "Creates a shelf. shelf-class can be :standard-shelf, :premium-shelf or :replica-shelf."
   [shelf-class]
   (case shelf-class
     :premium-shelf {:location  :shelf
@@ -72,15 +83,6 @@
   (when-let [fi (first stack)]
     (:disk-type fi)))
 
-(defn system-find-suitable-stack-old
-  "Returns a pair [index stack] in which we could add a shelf
-  or nil"
-  [system shelf]
-  (let [shelf-disk-type (:disk-type shelf)
-        stacks-with-idx (map vector (iterate inc 0) (:stacks system))
-        idx (seq (filter (fn [[i s]] (or (empty? s) (= shelf-disk-type (stack-get-disk-type s)))) stacks-with-idx))]
-    (if-not (nil? idx) (first idx))))
-
 (defn system-add-shelf
   "Adds a shelf to a system in the selected stack"
   [system stack-idx shelf]
@@ -88,11 +90,13 @@
     (update-in system [:stacks stack-idx] conj added-shelf)))
 
 (defn stack-get-capacity
+  "Gets the capacity from a stack as obtained from system-get-stack."
   [stack]
   (let [cap-entries (map :capacity stack)]
     (apply merge-with + cap-entries)))
 
 (defn system-get-capacity-per-stack
+  "Gets the system capacity separated by stacks as a seq of two positions."
   [system]
   (let [cap-summaries (map stack-get-capacity (:stacks system))]
     cap-summaries))
@@ -110,6 +114,7 @@
        (filter #(= :shelf (:location %)))))
 
 (defn system-get-capacity
+  "Gets all the capacity the system has."
   [system]
   (apply merge-with + (system-get-capacity-per-stack system)))
 

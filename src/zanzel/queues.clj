@@ -1,4 +1,5 @@
 (ns zanzel.queues
+  "Minimal queue implementation."
   (:import (clojure.lang PersistentQueue)))
 
 (defn empty-queue

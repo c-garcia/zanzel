@@ -1,4 +1,7 @@
 (ns zanzel.presentation
+  "Some presentation utilities which will allow us to:
+  * Draw systems and platforms
+  * Generate charts with the number of solutions evaluated and the ones still pending."
   (:require [zanzel.system :as zsy]
             [zanzel.platform :as zpl]
             [clojure.string :refer [join upper-case escape]]
@@ -12,6 +15,7 @@
            (org.jfree.chart.plot PlotOrientation)))
 
 (defn- head-as-str
+  "Generates a string represenation of a system head."
   [system]
   (let [internal-disks (first (filter #(= :internal (:location %)) (get-in system [:stacks 0])))
         stype (upper-case (name (:type system)))
@@ -19,12 +23,14 @@
     (format "%s:%s" stype dtype)))
 
 (defn- shelf-as-str
+  "Generates a string represenation of a system shelf."
   [shelf]
   (let [stype (upper-case (name (:type shelf)))
         sdisk (upper-case (name (:disk-type shelf)))]
     (format "%s:%s" stype sdisk)))
 
 (defn- storage-system-as-str
+  "Generates a string represenation of a system."
   [system]
   (let [head-str (head-as-str system)
         stack0-shelves (filter #(= :shelf (:location %)) (get-in system [:stacks 0]))
@@ -39,10 +45,12 @@
     res))
 
 (defn- html-escape
+  "Escapes html."
   [s]
   (escape s {\< "&lt;", \> "&gt;", \& "&amp;"}))
 
 (defn svg-block
+  "Generates a svg rect in (x,y) with w,h width and height. Inside it, there will be txt."
   [x y w h fs txt & {:keys [color text-color] :or {color "black" text-color "white"}}]
   (let [text-x (+ x (int (/ w 2)))
         text-y (+ y (int (/ h 2)))]
@@ -55,6 +63,7 @@
         (svg/add-style :font-family "monospace" :font-size fs :fill text-color)))))
 
 (defn head-as-svg
+  "Generates a svg representation of a system head."
   [system & {:keys [color text-color] :or {color "black" text-color "white"}}]
   (let [internal-shelf (first (filter #(= :internal (get % :location)) (zsy/system-get-internal-shelves system)))
         height (* 10 (get-in internal-shelf [:capacity :rack-u]))
@@ -66,6 +75,7 @@
     [svg height]))
 
 (defn storage-system-as-svg
+  "Generates a svg representation of a storage system."
   [system & {:keys [head-color head-text-color stack0-color stack0-text-color stack1-color stack1-text-color]
              :or   {head-color        "#626266"
                     head-text-color   "#FFFFFF"
@@ -98,6 +108,7 @@
             svg-shelves) y-pos]))
 
 (defn platform-as-svg
+  "Generates a svg representation of a storage system."
   [platform & {:keys [head-color head-text-color stack0-color stack0-text-color stack1-color stack1-text-color]
                :or   {head-color        "#626266"
                       head-text-color   "#FFFFFF"
@@ -120,12 +131,14 @@
     [(apply svg/group system-svgs) (- max-x 20) max-y]))
 
 (defn grid-as-svg
+  "Generates a svg representation of a grid."
   [width height u]
   (let [profile (svg/rect 0 0 height width :fill "none")
         horz (map #(svg/line 0 %1 width %1 :stroke "black") (range 0 height u))]
     (apply svg/group profile horz)))
 
 (defn capacity-as-svg
+  "Generates a svg representation of the platform capacity in std, prm and rpl classes."
   [width std prm rpl ops u]
   (let [std-txt (format "Std: %d TB." std)
         prm-txt (format "Prm: %d TB." prm)
@@ -146,6 +159,7 @@
         (text-item x-pos 90 u-txt)))))
 
 (defn solution-as-svg
+  "Generates an SVG representation of a whole solution (platform)."
   [platform]
   (let [[plat-svg max-pl-x max-pl-y] (platform-as-svg platform)
         num-systems (count platform)
@@ -162,6 +176,10 @@
     [all-svg max-pl-x (+ 40 100 max-pl-y)]))
 
 (defn monitor-chart
+  "Opens a window with a JFreeChart chart. It returns a map with
+  * :chart, the chart
+  * :generated, a DS for the generated solutions that can be updated real-time
+  * :explored, a DS for the explored solutions that can be updated real-time."
   []
   (let [ds-gen (XYSeries. "generated")
         ds-exp (XYSeries. "explored")
@@ -176,6 +194,7 @@
     {:chart chart :generated ds-gen :explored ds-exp}))
 
 (defn solution-as-png-file
+  "Saves a solution as a PNG file after creating an SVG representation of it."
   [filename platform]
   (let [[svg-group width height] (solution-as-svg platform)
         canvas (svg-doc (svg/svg svg-group))]
